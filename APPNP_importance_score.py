@@ -4,11 +4,12 @@ import torch
 import time
 import torch
 from torch import nn
-from network import GCN, APP, Transformer
+import torch.nn.functional as F
+from network import GCN
 import warnings
 warnings.filterwarnings("ignore")
 
-
+    
 def Compute_z(first_val, y, adj_mat, alpha):
 
     az = torch.spmm(adj_mat,y)
@@ -17,11 +18,11 @@ def Compute_z(first_val, y, adj_mat, alpha):
 
     return y, z
 
-def train_model(epoch, model, optimizer, features, adj_matrix_sparse, first_loss, second_loss, loss_temp, edge_index, args):
+def train_model(epoch, model, optimizer, features, adj_matrix_sparse, loss_temp, edge_index, args):
     model.train()
     optimizer.zero_grad()
-    t = time.time()
-    y, _ = model(features, edge_index)
+
+    _, _, y = model(features, edge_index)
 
     if epoch == 0:
         first_val = y
@@ -31,7 +32,6 @@ def train_model(epoch, model, optimizer, features, adj_matrix_sparse, first_loss
 
     y, z = Compute_z(torch.tensor(first_val, requires_grad=True), y, adj_matrix_sparse, args.alpha)
 
-
     loss1 = nn.MSELoss()(y,z)
     loss2 = y.abs().mean()
 
@@ -39,8 +39,6 @@ def train_model(epoch, model, optimizer, features, adj_matrix_sparse, first_loss
     # loss2 = torch.norm(y, 2)
 
     loss_train = loss1 #- loss2
-    first_loss.append(loss1.cpu().detach())
-    second_loss.append(loss2.cpu().detach())
     loss_temp.append(loss_train.cpu().detach())
     
     loss_train.backward(retain_graph=True)
@@ -50,19 +48,17 @@ def train_model(epoch, model, optimizer, features, adj_matrix_sparse, first_loss
 
 
 def APPNP_PPR(args, features, edge_index, adj_matrix_sparse, device):
-    model= GCN(args.num_features, 1, args.hidden).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    model= GCN(num_features = args.num_features, num_classes=1,  hidden=128).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     model.reset_parameters()
 
     
     start_time = time.time()  
     loss_temp=[]
-    first_loss = []
-    second_loss = []
     
-    for ep in range(200):
-        y = train_model(ep, model, optimizer, features, adj_matrix_sparse, first_loss, second_loss, loss_temp, edge_index, args)
+    for ep in range(400):
+        y = train_model(ep, model, optimizer, features, adj_matrix_sparse, loss_temp, edge_index, args)
 
     end_time = time.time()
     elapsed_time = end_time - start_time

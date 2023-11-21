@@ -9,17 +9,17 @@ import numpy as np
 # read the data
 def load_data(name_data, device):
     if name_data == 'dblp':
-        dataset = CitationFull(root='./dataset', name=name_data)
+        dataset = CitationFull(root='./dataset' + name_data, name=name_data)
     elif name_data == 'Cora_ML':
-        dataset = CitationFull(root='./dataset', name=name_data)
+        dataset = CitationFull(root='./dataset' + name_data, name=name_data)
     elif name_data == 'BlogCatalog':
-        dataset = AttributedGraphDataset(root='./dataset', name=name_data)
+        dataset = AttributedGraphDataset(root='./dataset' + name_data, name=name_data)
     elif name_data in ['texas', 'wisconsin']:
-        dataset = WebKB(root='./dataset', name=name_data)
+        dataset = WebKB(root='./dataset' + name_data, name=name_data)
     elif name_data == 'lastfmasia':
-        dataset = LastFMAsia(root='./dataset')
+        dataset = LastFMAsia(root='./dataset' + name_data)
     else:
-        dataset = Planetoid(root='./dataset', name=name_data)
+        dataset = Planetoid(root='./dataset' + name_data, name=name_data)
     dataset.transform = T.NormalizeFeatures()
     data = dataset[0].to(device)
     adj_matrix = torch.squeeze(to_dense_adj(data.edge_index), dim=0)

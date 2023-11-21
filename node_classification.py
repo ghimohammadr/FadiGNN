@@ -13,6 +13,7 @@ from network import GCN, APP, Transformer
 from sklearn.metrics import accuracy_score
 import os
 warnings.filterwarnings("ignore")
+torch.set_printoptions(precision=10)
 # Set a seed value (you can use any integer)
 
 
@@ -20,13 +21,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--alpha', type=int, default=0.85)
     parser.add_argument('--seed_value', type=int, default=42)
-    parser.add_argument('--percentages', type=float, default=[80]) # range from 0 to 100
+    parser.add_argument('--percentages', type=float, default=[10]) # range from 0 to 100
     parser.add_argument('--hidden', type=int, default=64)
     parser.add_argument('--name_data', type=str, default='cora') 
     parser.add_argument('--splittion', type=str, default='fixed') 
     parser.add_argument('--runs', type=int, default=2)
-    parser.add_argument('--epochs', type=int, default=80)
-    parser.add_argument('--early_stopping', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--early_stopping', type=int, default=15)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--weight_decay', type=float, default=0.0005)
     parser.add_argument('--normalize_features', type=bool, default=True)
@@ -47,6 +48,8 @@ if __name__ == '__main__':
     scores = APPNP_PPR(args, data.x, data.edge_index, adj_matrix_sparse, device)
 
 
+    print(min(scores))
+    print(max(scores))
     start = time.time()
     for run in range(args.runs):
 
@@ -94,14 +97,14 @@ if __name__ == '__main__':
             for epoch in range(args.epochs):
                 model.train()
                 optimizer.zero_grad()
-                out, _ = model(new_x, new_edge_index)
+                out, _, _ = model(new_x, new_edge_index)
                 loss = F.nll_loss(out[new_train_mask], new_train_label[new_train_mask]) 
                 loss.backward()
                 optimizer.step()
 
 
                 model.eval()
-                pred, _= model(new_x, new_edge_index)
+                pred, _, _ = model(new_x, new_edge_index)
                 val_loss = F.nll_loss(pred[new_val_mask], new_val_label[new_val_mask]).item()
 
                 if val_loss < best_val_loss and epoch > args.epochs // 2:
@@ -117,7 +120,7 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(path + 'checkpoint-best-acc.pkl'))
         model.eval()
 
-        _, logits = model(data.x, data.edge_index)
+        _, logits, _ = model(data.x, data.edge_index)
         # test_acc = int(logits[data.test_mask].eq(data.y[data.test_mask]).sum().item()) / int(data.test_mask.sum())
         test_acc = accuracy_score(data.y[data.test_mask], logits.argmax(1).cpu().detach().numpy()[data.test_mask])
         all_acc.append(test_acc)

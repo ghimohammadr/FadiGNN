@@ -15,7 +15,6 @@ class APP(torch.nn.Module):
         self.lin1 = nn.Linear(num_features, self.hidden)
         self.lin2 = nn.Linear(self.hidden, num_classes)
         self.prop1 = APPNP(10, 0.1)
-        # self.prop1 = total_com(10, 1)
         
 
     def reset_parameters(self):
@@ -31,7 +30,7 @@ class APP(torch.nn.Module):
         x = self.lin2(x)
         x = self.prop1(x, edge_index)
 
-        return F.log_softmax(x, dim=1), x
+        return F.log_softmax(x, dim=1), x, F.softmax(x, dim=0)
 
 class GCN(torch.nn.Module):
     def __init__(self, num_features, num_classes, hidden):
@@ -44,13 +43,14 @@ class GCN(torch.nn.Module):
         self.conv2.reset_parameters()
 
     def forward(self, x, edge_index):
-
+        
+        x = F.dropout(x, training=self.training)
         x = self.conv1(x, edge_index)
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
 
-        return F.log_softmax(x, dim=1), x
+        return F.log_softmax(x, dim=1), x, F.softmax(x, dim=0)
 
 class Transformer(nn.Module):
     def __init__(self, num_features, num_classes, hidden):
@@ -59,7 +59,6 @@ class Transformer(nn.Module):
         self.num_heads = 4
         self.embedding_dim = hidden
         self.head_dim = self.embedding_dim // self.num_heads
-        
 
         # for MHA
         self.q_proj = nn.Linear(num_features, self.embedding_dim)
@@ -101,5 +100,4 @@ class Transformer(nn.Module):
         x = F.dropout(x, training=self.training)
         x = self.lin1(x.squeeze(0))
 
-        return F.log_softmax(x, dim=1), x
-    
+        return F.log_softmax(x, dim=1), x, F.softmax(x, dim=0)

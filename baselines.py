@@ -10,7 +10,6 @@ from sklearn.metrics import accuracy_score, f1_score
 from torch_geometric.utils import to_dense_adj
 import scipy.sparse as sp
 warnings.filterwarnings("ignore")
-from APPNP_PPR_CORA import APPNP_PPR_cora
 from torch import tensor 
 import os
 import time
@@ -153,8 +152,6 @@ def splits(data, num_classes, exp):
             index = index[torch.randperm(index.size(0))]
             indices.append(index)
         
-        # random.seed(42)
-        # random.shuffle(indices)
         if exp == 'fullsupervised':
             train_index = torch.cat([i[:int(0.6*len(i))] for i in indices], dim=0)
             val_index = torch.cat([i[int(0.6*len(i)):int(0.8*len(i))] for i in indices], dim=0)
@@ -198,8 +195,7 @@ data = splits(data, n_classes, 'fullsupervised')
 
 
 # parameters
-percentages = [1]
-# percentages = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+percentages = [80]
 early_stopping = 10
 epochs = 300
 runs = 3

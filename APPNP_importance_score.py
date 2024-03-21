@@ -32,13 +32,10 @@ def train_model(epoch, model, optimizer, features, adj_matrix_sparse, loss_temp,
 
     y, z = Compute_z(torch.tensor(first_val, requires_grad=True), y, adj_matrix_sparse, args.alpha)
 
+
     loss1 = nn.MSELoss()(y,z)
-    loss2 = y.abs().mean()
 
-    # loss1 = torch.norm(y-z, 2)
-    # loss2 = torch.norm(y, 2)
-
-    loss_train = loss1 #- loss2
+    loss_train = loss1 
     loss_temp.append(loss_train.cpu().detach())
     
     loss_train.backward(retain_graph=True)
@@ -57,7 +54,7 @@ def APPNP_PPR(args, features, edge_index, adj_matrix_sparse, device):
     start_time = time.time()  
     loss_temp=[]
     
-    for ep in range(400):
+    for ep in range(200):
         y = train_model(ep, model, optimizer, features, adj_matrix_sparse, loss_temp, edge_index, args)
 
     end_time = time.time()
@@ -65,3 +62,5 @@ def APPNP_PPR(args, features, edge_index, adj_matrix_sparse, device):
     print(f"Elapsed time: {elapsed_time} seconds")
 
     return y
+
+

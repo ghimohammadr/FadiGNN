@@ -1,7 +1,5 @@
 import torch
 
-
-
 def get_adj_sparse(adj_matrix):
 
     

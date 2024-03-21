@@ -101,3 +101,4 @@ class Transformer(nn.Module):
         x = self.lin1(x.squeeze(0))
 
         return F.log_softmax(x, dim=1), x, F.softmax(x, dim=0)
+    

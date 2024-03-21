@@ -24,10 +24,10 @@ if __name__ == '__main__':
     parser.add_argument('--percentages', type=float, default=[10]) # range from 0 to 100
     parser.add_argument('--hidden', type=int, default=64)
     parser.add_argument('--name_data', type=str, default='cora') 
-    parser.add_argument('--splittion', type=str, default='fixed') 
+    parser.add_argument('--splittion', type=str, default='fullsupervised') 
     parser.add_argument('--runs', type=int, default=2)
-    parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--early_stopping', type=int, default=15)
+    parser.add_argument('--epochs', type=int, default=400) 
+    parser.add_argument('--early_stopping', type=int, default=10)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--weight_decay', type=float, default=0.0005)
     parser.add_argument('--normalize_features', type=bool, default=True)
@@ -48,15 +48,13 @@ if __name__ == '__main__':
     scores = APPNP_PPR(args, data.x, data.edge_index, adj_matrix_sparse, device)
 
 
-    print(min(scores))
-    print(max(scores))
     start = time.time()
     for run in range(args.runs):
 
         print("Run: ", run)
 
         # Define the model, optimizer, and loss function
-        model = APP(args.num_features, args.n_classes, 64).to(device)
+        model = GCN(args.num_features, args.n_classes, 64).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         model.reset_parameters()
 

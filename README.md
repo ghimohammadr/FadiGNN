@@ -1,5 +1,7 @@
 # FadiGNN 
 Feature-aware unsupervised detection of important nodes in graphs.
+![FadiGNN](https://github.com/user-attachments/assets/ef4e180a-d56e-4d67-a443-d8d408c1382e)
+
 
 
 

@@ -1,5 +1,5 @@
 # FadiGNN 
-Feature-aware unsupervised detection of important nodes in graphs
+Feature-aware unsupervised detection of important nodes in graphs.
 
 
 
